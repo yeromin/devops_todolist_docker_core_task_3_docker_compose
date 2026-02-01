@@ -17,6 +17,12 @@ services:
       - db_data:/var/lib/mysql
     networks:
       - db-data-net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "app_user", "-p1234"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   app:
     image: app:1.2
@@ -26,9 +32,10 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - DB_HOST=my-sql
+      - DB_HOST=db
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     networks:
       - db-data-net
 
