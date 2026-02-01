@@ -1,8 +1,12 @@
+version: '3'
+
 services:
   db:
+    image: my-sql:1.2
     build:
       context: .
       dockerfile: Dockerfile.mysql
+    container_name: my-sql
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: 1234
@@ -11,16 +15,26 @@ services:
       MYSQL_PASSWORD: 1234
     volumes:
       - db_data:/var/lib/mysql
+    networks:
+      - db-data-net
 
   app:
+    image: app:1.2
     build: .
+    container_name: pythonapp
     restart: unless-stopped
     ports:
       - "8080:8080"
     environment:
-      - DB_HOST=db
+      - DB_HOST=my-sql
     depends_on:
       - db
+    networks:
+      - db-data-net
 
 volumes:
   db_data:
+
+networks:
+  db-data-net:
+    driver: bridge
